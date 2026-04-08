@@ -63,3 +63,16 @@
 * **空行の自動スキップ機能**: ただし、A列〜C列すべてが完全に空っぽの「無記入の行」については、スクリプトが「不要なゴミデータ」と認識し、同期をスキップします。
 * **二重書き込みの防止**: 一度転記された行は、ステータス列に自動で「済」と入ります。この文字が存在する限り、同じ行が二度送られることはありません。
 * **修正データの再送について**: 一度転記された（「済」になった）あとに、元シートで空欄だったB列などを埋めても、再度自動で送信されることはありません。送り直したい行がある場合は、手動で該当行の「済」の文字を `Del` キー等で消去すれば、次のタイマー時に最新の状態が再び転記されます。
+
+---
+
+## 参考リンク (References)
+
+| サービス | 公式URL |
+|---|---|
+| Google Workspace Studio | https://workspace.google.com/products/workspace-studio/ |
+| Google Apps Script ドキュメント | https://developers.google.com/apps-script |
+| Google Apps Script リファレンス | https://developers.google.com/apps-script/reference |
+| SpreadsheetApp クラスリファレンス | https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app |
+| Google Chat (Workspace) | https://workspace.google.com/products/chat/ |
+| Google スプレッドシート | https://workspace.google.com/products/sheets/ |
