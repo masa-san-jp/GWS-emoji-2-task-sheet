@@ -17,18 +17,17 @@ function syncDataPeriodic() {
   const SOURCE_SHEET_NAME = "シート1";
   
   // ④ スクリプトが自動で「済」の目印を入れる列番号（例: D列なら 4）
-  const STATUS_COLUMN = 4;
+  const STATUS_COLUMN = 9;
   
   // ⑤ 転記したいデータの列数（例: A列からC列までの値だけを転記するなら 3）
-  const DATA_COLUMNS = 3;
+  const DATA_COLUMNS = 8;
 
   // ⑥ データが入力されている開始行（1行目がタイトルの場合は 2 を設定）
   const START_ROW = 2;
-
+  
   // ==========================================
   // 【処理部分】 ここから下は変更不要です
   // ==========================================
-
   const sourceSs = SpreadsheetApp.getActiveSpreadsheet();
   const sourceSheet = sourceSs.getSheetByName(SOURCE_SHEET_NAME);
   if (!sourceSheet) return;
@@ -36,7 +35,6 @@ function syncDataPeriodic() {
   const lastRow = sourceSheet.getLastRow();
   // 該当データがない場合は終了する
   if (lastRow < START_ROW) return; 
-
   // シートのデータを一括取得して処理を高速化
   const maxColumn = Math.max(DATA_COLUMNS, STATUS_COLUMN);
   const range = sourceSheet.getRange(START_ROW, 1, lastRow - START_ROW + 1, maxColumn);
@@ -69,7 +67,6 @@ function syncDataPeriodic() {
   
   // 新しく同期する対象がなければ何もしない
   if (rowsToAppend.length === 0) return;
-
   try {
     const targetSs = SpreadsheetApp.openById(TARGET_SPREADSHEET_ID);
     const targetSheet = targetSs.getSheetByName(TARGET_SHEET_NAME);
@@ -83,11 +80,25 @@ function syncDataPeriodic() {
     // ====================================
     // ② 元のシートに「済」を記入し二重同期を防ぐ
     // ====================================
+    // 【修正箇所】1セルずつの書き込みをやめ、配列で一括書き込みにして高速化・エラー防止
+    
+    // まず「済」を入力する列の範囲を一括取得
+    const numRows = lastRow - START_ROW + 1;
+    const statusRange = sourceSheet.getRange(START_ROW, STATUS_COLUMN, numRows, 1);
+    const statusValues = statusRange.getValues();
+    
+    // 記録しておいた行番号のインデックスを「済」に更新
     for (let i = 0; i < statusUpdates.length; i++) {
-        sourceSheet.getRange(statusUpdates[i], STATUS_COLUMN).setValue("済");
+        // START_ROWの分を引いて、配列のインデックス番号(0スタート)に合わせる
+        const rowIndex = statusUpdates[i] - START_ROW;
+        statusValues[rowIndex][0] = "済";
     }
     
+    // シートへ一気に反映させる（通信が1回で済む）
+    statusRange.setValues(statusValues);
+    
   } catch (error) {
-    console.error("転記時にエラーが発生しました: " + error.message);
+    // 画面上に直接エラーメッセージをポップアップ表示させる
+    Browser.msgBox("エラー原因: " + error.message);
   }
 }
